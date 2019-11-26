@@ -111,7 +111,7 @@
                :docker "Built container"
                :registry "Built and pushed container")
              image-name
-             ; "with digest" (.getHash (.getImageId container))
+             "with digest" (.getHash (.getImageId container))
              "in" (done-seconds))))
 
 (def image-types #{:docker :registry})
@@ -187,4 +187,3 @@
               (System/exit 1))
           :else
           (make-container options))))
-
