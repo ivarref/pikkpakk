@@ -80,6 +80,7 @@
                    ^String creation-time
                    ^String user
                    ^String image-name
+                   show-digest
                    image-type
                    additional-tag
                    label]}]
@@ -106,13 +107,14 @@
                                                           (ns->class main)]))
                       (.containerize (-> (Containerizer/to destination)
                                          (add-additional-tags additional-tag))))]
+    (when show-digest
+      (println "ImageId digest:" (.getHash (.getImageId container)))
+      (println "Container digest:" (.getHash (.getDigest container))))
     (println "\uD83D\uDE9C"
              (case image-type
                :docker "Built container"
                :registry "Built and pushed container")
              image-name
-             "with ImageId/digest" (.getHash (.getImageId container))
-             "Container/digest" (.getHash (.getDigest container))
              "in" (done-seconds))))
 
 (def image-types #{:docker :registry})
@@ -136,6 +138,7 @@
      [nil "--to-registry-password PASSWORD" "Set the password to use when deploying to registry, e.g. ${CI_JOB_TOKEN}."]
      ["-q" "--quiet" "Don't print a progress bar nor a start of build message" :default false] ; TODO implement
      ["-v" "--verbose" "Print status of image building" :default false] ; TODO implement
+     [nil "--show-digest" "Print digests of image" :default false]
      ["-m" "--main SYMBOL" "Main namespace"]]
     [["-h" "--help" "show this help"]]))
 
