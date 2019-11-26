@@ -111,7 +111,8 @@
                :docker "Built container"
                :registry "Built and pushed container")
              image-name
-             "with digest" (.getHash (.getImageId container))
+             "with ImageId/digest" (.getHash (.getImageId container))
+             "Container/digest" (.getHash (.getDigest container))
              "in" (done-seconds))))
 
 (def image-types #{:docker :registry})
