@@ -5,10 +5,10 @@
             [clojure.tools.cli :as cli]
             [clojure.string :as str])
   (:import (java.io File)
-           (com.google.cloud.tools.jib.api LayerConfiguration RegistryImage Jib AbsoluteUnixPath DockerDaemonImage Containerizer Credential CredentialRetriever ImageReference JibContainerBuilder)
+           (com.google.cloud.tools.jib.api LayerConfiguration RegistryImage Jib AbsoluteUnixPath DockerDaemonImage Containerizer Credential CredentialRetriever ImageReference JibContainerBuilder FilePermissions)
            (java.time Instant)
            (java.util.function BiFunction Consumer)
-           (java.nio.file FileSystems Paths Path)
+           (java.nio.file FileSystems Paths Path Files)
            (java.util Optional)
            (com.google.cloud.tools.jib.frontend CredentialRetrieverFactory)
            (java.lang.management ManagementFactory)))
@@ -25,6 +25,18 @@
       (if (.matches classfile-matcher source-path)
         (Instant/ofEpochSecond 8589934591)
         LayerConfiguration/DEFAULT_MODIFICATION_TIME))))
+
+(def file-permission-provider
+  (reify BiFunction
+    (apply [_ ^Path source ^Path destination-path]
+      (cond (Files/isDirectory source [])
+            FilePermissions/DEFAULT_FOLDER_PERMISSIONS
+
+            (Files/isExecutable source)
+            (FilePermissions/fromOctalString "755")
+
+            :else
+            FilePermissions/DEFAULT_FILE_PERMISSIONS))))
 
 (defn ^Path get-path [^String path & rst]
   (Paths/get path (into-array String (or rst []))))
@@ -50,7 +62,7 @@
                  (.setName target-path)
                  (.addEntryRecursive (get-path "target" target-path)
                                      (AbsoluteUnixPath/get (str "/app/" target-path))
-                                     LayerConfiguration/DEFAULT_FILE_PERMISSIONS_PROVIDER
+                                     file-permission-provider
                                      timestamp-provider)
                  (.build))))
 
