@@ -28,15 +28,15 @@
 
 (def file-permission-provider
   (reify BiFunction
-    (apply [_ ^Path source ^Path destination-path]
-      (cond (Files/isDirectory source [])
-            FilePermissions/DEFAULT_FOLDER_PERMISSIONS
+    (apply [_ ^Path source destination-path]
+      (if (Files/isDirectory source [])
+        FilePermissions/DEFAULT_FOLDER_PERMISSIONS
 
-            (Files/isExecutable source)
-            (FilePermissions/fromOctalString "755")
+        (Files/isExecutable source)
+        (FilePermissions/fromOctalString "755")
 
-            :else
-            FilePermissions/DEFAULT_FILE_PERMISSIONS))))
+        :else
+        FilePermissions/DEFAULT_FILE_PERMISSIONS))))
 
 (defn ^Path get-path [^String path & rst]
   (Paths/get path (into-array String (or rst []))))
