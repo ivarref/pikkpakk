@@ -8,7 +8,7 @@
            (com.google.cloud.tools.jib.api LayerConfiguration RegistryImage Jib AbsoluteUnixPath DockerDaemonImage Containerizer Credential CredentialRetriever ImageReference JibContainerBuilder FilePermissions)
            (java.time Instant)
            (java.util.function BiFunction Consumer)
-           (java.nio.file FileSystems Paths Path Files)
+           (java.nio.file FileSystems Paths Path Files LinkOption)
            (java.util Optional)
            (com.google.cloud.tools.jib.frontend CredentialRetrieverFactory)
            (java.lang.management ManagementFactory)))
@@ -28,15 +28,15 @@
 
 (def file-permission-provider
   (reify BiFunction
-    (apply [_ ^Path source destination-path]
-      (if (Files/isDirectory source [])
-        FilePermissions/DEFAULT_FOLDER_PERMISSIONS
+    (apply [_ source destination-path]
+      (cond (Files/isDirectory source (make-array LinkOption 0))
+            FilePermissions/DEFAULT_FOLDER_PERMISSIONS
 
-        (Files/isExecutable source)
-        (FilePermissions/fromOctalString "755")
+            (Files/isExecutable source)
+            (FilePermissions/fromOctalString "755")
 
-        :else
-        FilePermissions/DEFAULT_FILE_PERMISSIONS))))
+            :else
+            FilePermissions/DEFAULT_FILE_PERMISSIONS))))
 
 (defn ^Path get-path [^String path & rst]
   (Paths/get path (into-array String (or rst []))))
