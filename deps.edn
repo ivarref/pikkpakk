@@ -1,7 +1,5 @@
 {:paths ["src"]
  :deps  {org.clojure/clojure             {:mvn/version "1.10.1"}
-         badigeon/badigeon               {:git/url "https://github.com/EwenG/badigeon.git"
-                                          :sha     "f4bcca58536f49c10a5ea87b662f33ccf83338ce"
-                                          :tag     "0.0.10"}
+         badigeon/badigeon               {:mvn/version "1.7"}
          org.clojure/tools.cli           {:mvn/version "0.4.1"}
-         com.google.cloud.tools/jib-core {:mvn/version "0.12.0"}}}
+         com.google.cloud.tools/jib-core {:mvn/version "0.19.0"}}} ; https://maven-badges.herokuapp.com/maven-central/com.google.cloud.tools/jib-core
