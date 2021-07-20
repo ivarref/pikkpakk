@@ -5,13 +5,14 @@
             [clojure.tools.cli :as cli]
             [clojure.string :as str])
   (:import (java.io File)
-           (com.google.cloud.tools.jib.api LayerConfiguration RegistryImage Jib AbsoluteUnixPath DockerDaemonImage Containerizer Credential CredentialRetriever ImageReference JibContainerBuilder FilePermissions)
+           (com.google.cloud.tools.jib.api RegistryImage Jib DockerDaemonImage Containerizer Credential CredentialRetriever ImageReference JibContainerBuilder LayerConfiguration)
            (java.time Instant)
-           (java.util.function BiFunction Consumer)
+           (java.util.function Consumer)
            (java.nio.file FileSystems Paths Path Files LinkOption)
            (java.util Optional)
            (com.google.cloud.tools.jib.frontend CredentialRetrieverFactory)
-           (java.lang.management ManagementFactory)))
+           (java.lang.management ManagementFactory)
+           (com.google.cloud.tools.jib.api.buildplan AbsoluteUnixPath FilePermissions FilePermissionsProvider ModificationTimeProvider FileEntriesLayer)))
 
 (defn done-seconds []
   (format "%.2fs" (double (/ (.getUptime (ManagementFactory/getRuntimeMXBean)) 1000))))
@@ -20,15 +21,15 @@
                            (.getPathMatcher "glob:**.class")))
 
 (def timestamp-provider
-  (reify BiFunction
-    (apply [_ source-path destination-path]
+  (reify ModificationTimeProvider
+    (get [_ source-path destination-path]
       (if (.matches classfile-matcher source-path)
         (Instant/ofEpochSecond 8589934591)
-        LayerConfiguration/DEFAULT_MODIFICATION_TIME))))
+        FileEntriesLayer/DEFAULT_MODIFICATION_TIME))))
 
 (def file-permission-provider
-  (reify BiFunction
-    (apply [_ source destination-path]
+  (reify FilePermissionsProvider
+    (get [_ source destination-path]
       (cond (Files/isDirectory source (make-array LinkOption 0))
             FilePermissions/DEFAULT_FOLDER_PERMISSIONS
 
